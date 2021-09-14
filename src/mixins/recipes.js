@@ -1,0 +1,44 @@
+export const creepRecipes = {
+    HARVESTER: {
+        ZERO: [],
+        SMALL: [WORK, CARRY, MOVE],
+        MEDIUM: [WORK, WORK, CARRY, CARRY, MOVE, MOVE],
+        LARGE: [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]
+    },
+    HAULER: {
+        ZERO: [],
+        SMALL: [CARRY, CARRY, MOVE],
+        MEDIUM: [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE],
+        LARGE: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]
+    },
+    BUILDER: {
+        ZERO: [],
+        SMALL: [WORK, CARRY, MOVE],
+        MEDIUM: [WORK, WORK, WORK, CARRY, CARRY, MOVE],
+        LARGE: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE]
+    },
+    UPGRADER: {
+        ZERO: [],
+        SMALL: [WORK, CARRY, MOVE],
+        MEDIUM: [WORK, WORK, WORK, CARRY, CARRY, MOVE],
+        LARGE: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE]
+    },
+    SCOUT: {
+        ZERO: [],
+        SMALL: [WORK, CARRY, MOVE],
+        MEDIUM: [WORK, WORK, WORK, CARRY, CARRY, MOVE],
+        LARGE: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE]
+    },
+    SOLDIER: {
+        ZERO: [],
+        SMALL: [HEAL, MOVE, TOUGH, MOVE, ATTACK],
+        MEDIUM: [HEAL, MOVE, TOUGH, MOVE, ATTACK, ATTACK],
+        LARGE: [HEAL, TOUGH, TOUGH, MOVE, MOVE, MOVE, ATTACK, ATTACK]
+    },
+    PRIEST: {
+        ZERO: [],
+        SMALL: [WORK, CARRY, MOVE],
+        MEDIUM: [WORK, WORK, WORK, CARRY, CARRY, MOVE],
+        LARGE: [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE]
+    }
+}
