@@ -1,26 +1,25 @@
-var harvester = {
+import { taskHarvest } from '../mixins/tasks';
+
+var roleHarvester = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-        if(creep.store.getFreeCapacity() > 0) {
-            var sources = creep.room.find(FIND_SOURCES);
-            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0]);
-            }
+        if(obj.store.getFreeCapacity() > 0) {
+            taskHarvest(creep);
+            creep.harvest();
         }
+        // If creep isn't already next to that source, go there
         else {
-            // here is the sayHello() prototype
-            creep.sayHello();
-            
-            if(creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(Game.spawns['Spawn1']);
+            if(obj.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                obj.moveTo(Game.spawns['Spawn1']);
             }
         }
     },
+
     // checks if the room needs to spawn a creep
     spawn: function(room) {
         var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' && creep.room.name == room.name);
-        console.log('Harvesters: ' + harvesters.length, room.name);
+        // console.log('Harvesters: ' + harvesters.length, room.name);
 
         if (harvesters.length < 2) {
             return true;
@@ -36,4 +35,4 @@ var harvester = {
     }
 };
 
-module.exports = harvester;
+module.exports = roleHarvester;

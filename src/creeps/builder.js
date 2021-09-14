@@ -1,15 +1,24 @@
+import { taskHarvest, taskBuild } from '../mixins/tasks';
+
 var roleBuilder = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
+		
+	    if(creep.memory.currentTask =='building' && creep.store[RESOURCE_ENERGY] == 0) {
+            // creep.memory.currentTask =='build'
+			taskHarvest(creep);
 
-	    if(creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
-            creep.memory.building = false;
-            creep.say('🔄 harvest');
+			creep.harvest();
+            creep.say('🔄 harvesting');
 	    }
-	    if(!creep.memory.building && creep.store.getFreeCapacity() == 0) {
-	        creep.memory.building = true;
-	        creep.say('🚧 build');
+		
+	    if(!creep.memory.currentTask =='building' && creep.store.getFreeCapacity() == 0) {
+	        // creep.memory.currentTask = 'build';
+			taskBuild(creep);
+
+			creep.build();
+	        creep.say('🚧 building');
 	    }
 
 	    if(creep.memory.building) {
