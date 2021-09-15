@@ -80,9 +80,12 @@ return module.exports;
 /********** Start module 1: /Users/markwilliams/Documents/github/screeps/src/creeps/index.js **********/
 __modules[1] = function(module, exports) {
 let creepLogic = {
-    harvester:     __require(4,1),
-    upgrader:      __require(5,1),
-    builder:      __require(6,1),
+    harvester:          __require(4,1),
+    hauler:             __require(5,1),
+    upgrader:           __require(6,1),
+    builder:            __require(7,1),
+    soldier:            __require(8,1),
+    scout:              __require(9,1)
 }
 
 module.exports = creepLogic;
@@ -92,7 +95,7 @@ return module.exports;
 /********** Start module 2: /Users/markwilliams/Documents/github/screeps/src/room/index.js **********/
 __modules[2] = function(module, exports) {
 let roomLogic = {
-    spawning:     __require(7,2),
+    spawning:     __require(10,2),
 }
 
 module.exports = roomLogic;
@@ -102,26 +105,26 @@ return module.exports;
 /********** Start module 3: /Users/markwilliams/Documents/github/screeps/src/prototypes/index.js **********/
 __modules[3] = function(module, exports) {
 let files = {
-    creep: __require(8,3)
+    creep: __require(11,3),
+    room: __require(12,3)
 }
 return module.exports;
 }
 /********** End of module 3: /Users/markwilliams/Documents/github/screeps/src/prototypes/index.js **********/
 /********** Start module 4: /Users/markwilliams/Documents/github/screeps/src/creeps/harvester.js **********/
 __modules[4] = function(module, exports) {
+import { taskHarvest } from '../mixins/tasks';
+
 var roleHarvester = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
+        taskHarvest(creep);
         if(creep.store.getFreeCapacity() > 0) {
-            var sources = creep.room.find(FIND_SOURCES);
-            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0]);
-            }
+            creep.harvest();
+            creep.memory.currentTask = "harvesting";
         }
         else {
-            creep.sayHello();
-            
             if(creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(Game.spawns['Spawn1']);
             }
@@ -129,7 +132,6 @@ var roleHarvester = {
     },
     spawn: function(room) {
         var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' && creep.room.name == room.name);
-        console.log('Harvesters: ' + harvesters.length, room.name);
 
         if (harvesters.length < 2) {
             return true;
@@ -148,34 +150,61 @@ module.exports = roleHarvester;
 return module.exports;
 }
 /********** End of module 4: /Users/markwilliams/Documents/github/screeps/src/creeps/harvester.js **********/
-/********** Start module 5: /Users/markwilliams/Documents/github/screeps/src/creeps/upgrader.js **********/
+/********** Start module 5: /Users/markwilliams/Documents/github/screeps/src/creeps/hauler.js **********/
 __modules[5] = function(module, exports) {
+import { taskHaul } from '../mixins/tasks';
+
+var roleHauler = {
+
+    /** @param {Creep} creep **/
+    run: function(creep) {
+        taskHaul(creep);
+    },
+    spawn: function(room) {
+        var haulers = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler' && creep.room.name == room.name);
+
+        if (haulers.length < 1) {
+            return true;
+        }
+    },
+    spawnData: function(room) {
+        let name = 'HAUL' + Game.time;
+        let body = [WORK, CARRY, MOVE];
+        let memory = {role: 'hauler'};
+    
+        return {name, body,patrol};
+    }
+}
+    
+module.exports = roleHauler;
+return module.exports;
+}
+/********** End of module 5: /Users/markwilliams/Documents/github/screeps/src/creeps/hauler.js **********/
+/********** Start module 6: /Users/markwilliams/Documents/github/screeps/src/creeps/upgrader.js **********/
+__modules[6] = function(module, exports) {
+import { taskRefuel, taskUpgrade } from '../mixins/tasks';
+
 var roleUpgrader = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
+        taskRefuel(creep);
+        taskUpgrade(creep);
         if(creep.store[RESOURCE_ENERGY] == 0) {
-            var sources = creep.room.find(FIND_SOURCES);
-            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0]);
-            }
-        }
-        else {
-            if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller);
-            }
+            creep.Refuel();
+        } else {
+            creep.upgrade();
         }
     },
     spawn: function(room) {
         var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader' && creep.room.name == room.name);
-        console.log('Upgraders: ' + upgraders.length, room.name);
 
         if (upgraders.length < 2) {
             return true;
         }
     },
     spawnData: function(room) {
-            let name = 'Upgrader' + Game.time;
+            let name = 'UPG' + Game.time;
             let body = [WORK, CARRY, MOVE];
             let memory = {role: 'upgrader'};
         
@@ -186,47 +215,124 @@ var roleUpgrader = {
 module.exports = roleUpgrader;
 return module.exports;
 }
-/********** End of module 5: /Users/markwilliams/Documents/github/screeps/src/creeps/upgrader.js **********/
-/********** Start module 6: /Users/markwilliams/Documents/github/screeps/src/creeps/builder.js **********/
-__modules[6] = function(module, exports) {
+/********** End of module 6: /Users/markwilliams/Documents/github/screeps/src/creeps/upgrader.js **********/
+/********** Start module 7: /Users/markwilliams/Documents/github/screeps/src/creeps/builder.js **********/
+__modules[7] = function(module, exports) {
+import { taskRefuel, taskBuild, taskRepair } from '../mixins/tasks';
+
 var roleBuilder = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
+		taskRefuel(creep);
+		taskBuild(creep);
+		taskRepair(creep);
+		const constructionSites = creep.room.find(FIND_CONSTRUCTION_SITES);
+		const repairSites = creep.room.find(FIND_MY_STRUCTURES);
+		var repairTargets = repairSites.filter(site => site.hits < site.hitsMax);
+		
+		if (creep.store[RESOURCE_ENERGY] > 0) {
+			if (repairTargets) {
+				creep.repair();
+			} else if (constructionSites) {
+				creep.build();
+			} else {
+				creep.refuel();
+			}
+		} else {
+			creep.harvest();
+		}
+	},
+    spawn: function(room) {
+        var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder' && creep.room.name == room.name);
 
-	    if(creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
-            creep.memory.building = false;
-            creep.say('🔄 harvest');
-	    }
-	    if(!creep.memory.building && creep.store.getFreeCapacity() == 0) {
-	        creep.memory.building = true;
-	        creep.say('🚧 build');
-	    }
-
-	    if(creep.memory.building) {
-	        var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-            if(targets.length) {
-                if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
-                }
-            }
-	    }
-	    else {
-	        var sources = creep.room.find(FIND_SOURCES);
-            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
-            }
-	    }
-	}
+        if (builders.length < 2) {
+            return true;
+        }
+    },
+    spawnData: function(room) {
+            let name = 'BLD' + Game.time;
+            let body = [WORK, CARRY, MOVE];
+            let memory = {role: 'builder'};
+        
+            return {name, body, memory};
+    }
 };
 
 module.exports = roleBuilder;
 return module.exports;
 }
-/********** End of module 6: /Users/markwilliams/Documents/github/screeps/src/creeps/builder.js **********/
-/********** Start module 7: /Users/markwilliams/Documents/github/screeps/src/room/spawning.js **********/
-__modules[7] = function(module, exports) {
-let creepLogic = __require(1,7);
+/********** End of module 7: /Users/markwilliams/Documents/github/screeps/src/creeps/builder.js **********/
+/********** Start module 8: /Users/markwilliams/Documents/github/screeps/src/creeps/soldier.js **********/
+__modules[8] = function(module, exports) {
+import { taskRefuel, taskAttack, taskGuard, taskPatrol } from '../mixins/tasks';
+
+var roleSoldier = {
+
+    /** @param {Creep} creep **/
+    run: function(creep) {
+        taskAttack(creep);
+        taskRefuel(creep);
+        taskGuard(creep);
+        taskPatrol(creep);
+
+    },
+    spawn: function(room) {
+        var soldiers = _.filter(Game.creeps, (creep) => creep.memory.role == 'soldier' && creep.room.name == room.name);
+
+        if (soldiers.length < 2) {
+            return true;
+        }
+    },
+    spawnData: function(room) {
+            let name = 'SOLD' + Game.time;
+            let body = [WORK, CARRY, MOVE];
+            let memory = {role: 'soldier'};
+        
+            return {name, body, memory};
+    }
+};
+
+module.exports = roleSoldier;
+return module.exports;
+}
+/********** End of module 8: /Users/markwilliams/Documents/github/screeps/src/creeps/soldier.js **********/
+/********** Start module 9: /Users/markwilliams/Documents/github/screeps/src/creeps/scout.js **********/
+__modules[9] = function(module, exports) {
+import { taskHarvest, taskRefuel, taskPatrol } from '../mixins/tasks';
+
+var roleScout = {
+
+    /** @param {Creep} creep **/
+    run: function(creep) {
+        taskHarvest(creep);
+        taskRefuel(creep);
+        taskPatrol(creep);
+
+    },
+    spawn: function(room) {
+        var scouts = _.filter(Game.creeps, (creep) => creep.memory.role == 'scout' && creep.room.name == room.name);
+
+        if (scouts.length < 1) {
+            return true;
+        }
+    },
+    spawnData: function(room) {
+        let name = 'SCOUT' + Game.time;
+        let body = [WORK, CARRY, MOVE];
+        let memory = {role: 'scout'};
+    
+        return {name, body,patrol};
+    }
+}
+    
+module.exports = roleScout;
+return module.exports;
+}
+/********** End of module 9: /Users/markwilliams/Documents/github/screeps/src/creeps/scout.js **********/
+/********** Start module 10: /Users/markwilliams/Documents/github/screeps/src/room/spawning.js **********/
+__modules[10] = function(module, exports) {
+let creepLogic = __require(1,10);
 let creepTypes = _.keys(creepLogic);
 
 function spawnCreeps(room) {
@@ -248,15 +354,31 @@ function spawnCreeps(room) {
 module.exports = spawnCreeps;
 return module.exports;
 }
-/********** End of module 7: /Users/markwilliams/Documents/github/screeps/src/room/spawning.js **********/
-/********** Start module 8: /Users/markwilliams/Documents/github/screeps/src/prototypes/creep.js **********/
-__modules[8] = function(module, exports) {
-Creep.prototype.sayHello = function sayHello() {
-    this.say("Hello", true);
+/********** End of module 10: /Users/markwilliams/Documents/github/screeps/src/room/spawning.js **********/
+/********** Start module 11: /Users/markwilliams/Documents/github/screeps/src/prototypes/creep.js **********/
+__modules[11] = function(module, exports) {
+import "../mixins/tasks"
+
+Creep.prototype = {
+    name: '',
+    level: 1,
+    role: undefined,
+    currentTask: 'inactive',
+    birthDate: Game.time,
+    age: Game.time - birthDate,
+    sayHello : function sayHello() { this.say("Hello", true) },
 }
 return module.exports;
 }
-/********** End of module 8: /Users/markwilliams/Documents/github/screeps/src/prototypes/creep.js **********/
+/********** End of module 11: /Users/markwilliams/Documents/github/screeps/src/prototypes/creep.js **********/
+/********** Start module 12: /Users/markwilliams/Documents/github/screeps/src/prototypes/room.js **********/
+__modules[12] = function(module, exports) {
+Room.prototype = {
+
+}
+return module.exports;
+}
+/********** End of module 12: /Users/markwilliams/Documents/github/screeps/src/prototypes/room.js **********/
 /********** Footer **********/
 if(typeof module === "object")
 	module.exports = __require(0);

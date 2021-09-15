@@ -1,17 +1,23 @@
 import { taskHarvest } from '../mixins/tasks';
 
 var roleHarvester = {
+    // Description - harvesters collect resources from energy sources, and dump said resources into spawns, extensions, storage facilities, or towers
 
     /** @param {Creep} creep **/
     run: function(creep) {
-        if(obj.store.getFreeCapacity() > 0) {
-            taskHarvest(creep);
+        // Abilities
+        taskHarvest(creep);
+
+        // Logic
+        // If creep has free capacity in personal storage, go harvest
+        if(creep.store.getFreeCapacity() > 0) {
             creep.harvest();
+            creep.memory.currentTask = "harvesting";
         }
-        // If creep isn't already next to that source, go there
+        // If creep isn't already next to the nearest source, go there first
         else {
-            if(obj.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                obj.moveTo(Game.spawns['Spawn1']);
+            if(creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(Game.spawns['Spawn1']);
             }
         }
     },

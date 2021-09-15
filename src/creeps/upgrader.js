@@ -1,18 +1,23 @@
-import { taskHarvest, taskUpgrade } from '../mixins/tasks';
+import { taskRefuel, taskUpgrade } from '../mixins/tasks';
 
 var roleUpgrader = {
+    // Description - Upgraders are solely dedicated to upgrading the room controller
 
     /** @param {Creep} creep **/
     run: function(creep) {
+        // Abilities
+        taskRefuel(creep);
+        taskUpgrade(creep);
+
+        // Logic
+        // If Creep has no energy, go refuel, otherwise, upgrade the Controller.
         if(creep.store[RESOURCE_ENERGY] == 0) {
-            taskHarvest(creep);
-            creep.harvest();
-        }
-        else {
-            taskUpgrade(creep);
+            creep.Refuel();
+        } else {
             creep.upgrade();
         }
     },
+
     // checks if the room needs to spawn a creep
     spawn: function(room) {
         var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader' && creep.room.name == room.name);
@@ -24,7 +29,7 @@ var roleUpgrader = {
     },
     // returns an object with the data to spawn a new creep
     spawnData: function(room) {
-            let name = 'Upgrader' + Game.time;
+            let name = 'UPG' + Game.time;
             let body = [WORK, CARRY, MOVE];
             let memory = {role: 'upgrader'};
         
